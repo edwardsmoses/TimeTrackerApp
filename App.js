@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, Platform } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, ScrollView, Platform, KeyboardAvoidingView } from 'react-native';
 
 import uuid from 'react-native-uuid';
 
@@ -18,7 +18,7 @@ export default function App() {
       project: 'House Chores',
       id: uuid.v4(),
       elapsed: 5456099,
-      isRunning: true,
+      isRunning: false,
     },
     {
       title: 'Work on LearnFlo',
@@ -29,8 +29,31 @@ export default function App() {
     },
   ];
 
+  let intervalId = '';
 
   const [Timers, setTimers] = useState(initTimers);
+
+  useEffect(() => {
+
+    const TIME_INTERVAL = 1000;
+
+    intervalId = setInterval(() => {
+
+      setTimers(Timers.map(timer => {
+        const { elapsed, isRunning } = timer;
+        return {
+          ...timer,
+          elapsed: isRunning ? elapsed + TIME_INTERVAL : elapsed
+        };
+      }));
+    }, TIME_INTERVAL);
+
+    return () => {
+      clearInterval(intervalId);
+    }
+  }, [Timers, setTimers, intervalId]
+  );
+
 
   const handleCreateFormSubmit = ({ title, project }) => {
     setTimers([newTimer(title, project), ...Timers]);
@@ -55,7 +78,23 @@ export default function App() {
   const handleFormDelete = (id) => {
     var newTimers = Timers.filter(m => m.id !== id);
     setTimers(newTimers);
-  }
+  };
+
+
+  const toggleTimer = timerId => {
+    console.log(timerId);
+    setTimers(Timers.map(timer => {
+      const { id, isRunning } = timer;
+      if (id === timerId) {
+        return {
+          ...timer,
+          isRunning: !isRunning
+        }
+      }
+      return timer;
+    }));
+  };
+
 
   return (
     <View style={styles.appContainer}>
@@ -74,10 +113,13 @@ export default function App() {
             onFormSubmit={handleFormSubmit}
             isRunning={isRunning}
             onTimerDelete={handleFormDelete}
+            onStartPress={toggleTimer}
+            onStopPress={toggleTimer}
           />
         ))}
 
       </ScrollView>
+
     </View>
   );
 };

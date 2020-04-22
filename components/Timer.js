@@ -7,13 +7,33 @@ import { millisecondsToHuman } from '../utils/TimerUtils';
 import TimerButton from './TimerButton';
 
 
-const Timer = ({ id, title, project, elapsed, onEditPress, onTimerDelete }) => {
+const Timer = ({ id, title, project, elapsed, isRunning, onEditPress, onTimerDelete, onStartPress, onStopPress }) => {
 
     const elapsedString = millisecondsToHuman(elapsed);
 
     const handleTimerDelete = () => {
         onTimerDelete(id);
     }
+
+    const handleStartPress = () => {
+        onStartPress(id);
+    };
+
+    const handleStopPress = () => {
+        onStopPress(id);
+    };
+
+    const renderActionButton = () => {
+        if (isRunning) {
+            return (
+                <TimerButton color="#DB2828" title="Stop" onPress={handleStopPress} />
+            );
+        }
+        return (
+            <TimerButton color="#21BA45" title="Start" onPress={handleStartPress} />
+        );
+    };
+
 
     return (
         <View style={styles.timerContainer}>
@@ -24,7 +44,7 @@ const Timer = ({ id, title, project, elapsed, onEditPress, onTimerDelete }) => {
                 <TimerButton color="blue" small title="Edit" onPress={onEditPress} />
                 <TimerButton color="blue" small title="Remove" onPress={handleTimerDelete} />
             </View>
-            <TimerButton color="#21BA45" title="Start" />
+            {renderActionButton()}
         </View>
 
     )
